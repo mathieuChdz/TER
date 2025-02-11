@@ -49,6 +49,6 @@ def gpu_matrix_multiplication(size):
     return C
 
 if __name__ == "__main__":
-    size = 30000
+    size = 100000
     result_gpu = gpu_matrix_multiplication(size)
     result_cpu = cpu_matrix_multiplication(size)
