@@ -35,7 +35,7 @@ def multiple_multiplications(n, max_size):
     """
     x = []
     y = []
-    for size in range(0, max_size, max_size // n): :
+    for size in range(0, max_size, max_size // n):
         time = cpu_matrix_multiplication(size)
         x.append(size)
         y.append(time)
