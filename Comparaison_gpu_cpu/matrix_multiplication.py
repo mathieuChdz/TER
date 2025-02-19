@@ -59,4 +59,4 @@ def draw(x, y, filename):
 
 if __name__ == "__main__":
     x, y = multiple_multiplications(40, 20000)
-    draw(x, y, 'cpu_matrix_multiplication.png')
+    draw(x, y, 'graphs/matrix_multiplication.png')
