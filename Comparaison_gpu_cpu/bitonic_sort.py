@@ -1,33 +1,93 @@
-import numpy as np
+import os
+from random import randint
+import matplotlib.pyplot as plt
+import time
 
-def bitonic_merge(arr, low, cnt, up):
-    print(f"bitonic_merge called with low={low}, cnt={cnt}, up={up}")
-    if cnt > 1:
-        k = cnt // 2
-        for i in range(low, low + k):
-            if (arr[i] > arr[i + k]) == up:
-                arr[i], arr[i + k] = arr[i + k], arr[i]
-        print(f"Array after merge step: {arr}")
-        bitonic_merge(arr, low, k, up)
-        bitonic_merge(arr, low + k, k, up)
+# Python program for Bitonic Sort. Note that this program
+# works only when size of input is a power of 2.
 
-def bitonic_sort(arr, low, cnt, up):
-    print(f"bitonic_sort called with low={low}, cnt={cnt}, up={up}")
-    if cnt > 1:
-        k = cnt // 2
-        bitonic_sort(arr, low, k, 1)
-        bitonic_sort(arr, low + k, k, 0)
-        bitonic_merge(arr, low, cnt, up)
-    print(f"Array after sort step: {arr}")
+# The parameter dir indicates the sorting direction, ASCENDING
+# or DESCENDING; if (a[i] > a[j]) agrees with the direction,
+# then a[i] and a[j] are interchanged.*/
+def compAndSwap(a, i, j, dire):
+	if (dire==1 and a[i] > a[j]) or (dire==0 and a[i] < a[j]):
+		a[i],a[j] = a[j],a[i]
 
-def sort(arr):
-    print(f"Initial array: {arr}")
-    arr = np.array(arr)
-    bitonic_sort(arr, 0, len(arr), 1)
-    print(f"Sorted array: {arr}")
-    return arr
+# It recursively sorts a bitonic sequence in ascending order,
+# if dir = 1, and in descending order otherwise (means dir=0).
+# The sequence to be sorted starts at index position low,
+# the parameter cnt is the number of elements to be sorted.
+def bitonicMerge(a, low, cnt, dire):
+	if cnt > 1:
+		k = cnt//2
+		for i in range(low , low+k):
+			compAndSwap(a, i, i+k, dire)
+		bitonicMerge(a, low, k, dire)
+		bitonicMerge(a, low+k, k, dire)
+
+# This function first produces a bitonic sequence by recursively
+# sorting its two halves in opposite sorting orders, and then
+# calls bitonicMerge to make them in the same order
+def bitonicSort(a, low, cnt,dire):
+	if cnt > 1:
+		k = cnt//2
+		bitonicSort(a, low, k, 1)
+		bitonicSort(a, low+k, k, 0)
+		bitonicMerge(a, low, cnt, dire)
+
+# Caller of bitonicSort for sorting the entire array of length N
+# in ASCENDING order
+def sort(a,N, up):
+	bitonicSort(a,0, N, up)
+
+# Driver code to test above
+
+
+# print ("\n\nSorted array is")
+# for i in range(n):
+# 	print("%d" %a[i],end=" ")
+# print("\n")
+
+def bitsonicSortListRange(pow):
+	listeToSort = []
+	size = 2
+
+	x = []
+	y = []
+
+	while size < 2**pow:
+		listeToSort = [randint(0, 1000000) for _ in range(size)]
+		print("taille actuelle : ", len(listeToSort), " | ", size)
+		start = time.time()
+		sort(listeToSort, size, 1)
+		end = time.time()
+
+		print("Time taken to sort the list of size ", size, " is ", end - start, "s")
+
+		x.append(size)
+		y.append(end - start)
+
+		size *= 2
+	
+	return x, y
+
+def draw(x, y, filename):
+    """
+    Draws a plot of the time taken to multiply matrices of increasing size on CPU.
+
+    Args:
+        x (list): The size of the matrices.
+        y (list): The time taken to multiply the matrices.
+        filename (str): The name of the file to save the plot.
+    """
+    plt.plot(x, y)
+    plt.xlabel('Matrix size')
+    plt.ylabel('Time (s)')
+    plt.title('Matrix multiplication on CPU')
+    plt.savefig(filename)
 
 if __name__ == "__main__":
-    arr = [3, 7, 2, 5, 1, 4, 6, 8]
-    sorted_arr = sort(arr)
-    print(f"Final sorted array: {sorted_arr}")
+	if not os.path.exists('graphs'):
+		os.makedirs('graphs')
+	x, y = bitsonicSortListRange(20)
+	draw(x, y, 'graphs/bitonic_sort.png')
