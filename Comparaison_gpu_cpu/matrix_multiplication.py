@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import os
 
 def cpu_matrix_multiplication(size):
     """
@@ -58,5 +59,7 @@ def draw(x, y, filename):
     plt.show()
 
 if __name__ == "__main__":
+    if not os.path.exists('graphs'):
+        os.makedirs('graphs')
     x, y = multiple_multiplications(40, 20000)
     draw(x, y, 'graphs/matrix_multiplication.png')
