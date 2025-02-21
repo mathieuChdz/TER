@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import os
 
 def Fibonacci(n):
     """
@@ -55,5 +56,7 @@ def draw(x, y, filename):
     plt.show()
 
 if __name__ == "__main__":
+    if not os.path.exists('graphs'):
+        os.makedirs('graphs')
     x, y = multiple_Fibonacci(10, 20)
     draw(x, y, "graphs/fibonacci.png")
