@@ -58,5 +58,5 @@ def draw(x, y, filename):
     plt.show()
 
 if __name__ == "__main__":
-    x, y = multiple_multiplications(40, 20000)
-    draw(x, y, 'cpu_matrix_multiplication.png')
+    x, y = multiple_multiplications(40, 50000)
+    draw(x, y, 'graphs/cpu_matrix_multiplication.png')

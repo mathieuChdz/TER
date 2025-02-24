@@ -55,6 +55,8 @@ def bitsonicSortListRange(pow):
 	x = []
 	y = []
 
+	i_pow = 1
+
 	while size < 2**pow:
 		listeToSort = [randint(0, 1000000) for _ in range(size)]
 		print("taille actuelle : ", len(listeToSort), " | ", size)
@@ -62,12 +64,13 @@ def bitsonicSortListRange(pow):
 		sort(listeToSort, size, 1)
 		end = time.time()
 
-		print("Time taken to sort the list of size ", size, " is ", end - start, "s")
+		print("Time taken to sort the list of size ", size, " is ", end - start, "s --> ", i_pow)
 
 		x.append(size)
 		y.append(end - start)
 
 		size *= 2
+		i_pow += 1
 	
 	return x, y
 
@@ -89,5 +92,5 @@ def draw(x, y, filename):
 if __name__ == "__main__":
 	if not os.path.exists('graphs'):
 		os.makedirs('graphs')
-	x, y = bitsonicSortListRange(20)
+	x, y = bitsonicSortListRange(26)
 	draw(x, y, 'graphs/bitonic_sort.png')
