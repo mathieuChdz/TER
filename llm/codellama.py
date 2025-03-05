@@ -30,6 +30,12 @@ def load_model(model_id):
     print("")
     return model, tokenizer
 
+def unload_model(model, tokenizer):
+    del model
+    del tokenizer
+    torch.cuda.synchronize()
+    torch.cuda.empty_cache()
+
 def chat_with_model(model, tokenizer):
     print("Type 'exit' or 'quit' or 'q' to stop chatting.\n")
     while True:
@@ -50,4 +56,7 @@ def chat_with_model(model, tokenizer):
 if __name__ == "__main__":
     model_id = ask_model()
     model, tokenizer = load_model(model_id)
-    chat_with_model(model, tokenizer)
+    try :
+        chat_with_model(model, tokenizer)
+    finally :
+        unload_model(model, tokenizer)
