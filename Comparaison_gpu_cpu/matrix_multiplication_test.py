@@ -49,6 +49,18 @@ def gpu_matrix_multiplication(size):
     print(f"GPU: Computation completed in {end_time - start_time:.2f} seconds")
     return C
 
+
+def run_gpu_with_consumtion(parSize, star_power):
+    size = parSize
+    gc.init_NVML()
+    begin_power = star_power
+    result_gpu = gpu_matrix_multiplication(size)
+    end_power = gc.get_total_power_usage()
+    gc.stop_NVML()
+
+    print(f"GPU: Power consumption: {end_power - begin_power:.2f} watts")
+    return end_power - begin_power, begin_power
+
 if __name__ == "__main__":
     size = 10000
     gc.init_NVML()
