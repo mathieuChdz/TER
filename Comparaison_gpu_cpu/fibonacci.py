@@ -11,7 +11,7 @@ POINTS_NUM = 20
 MAX_SIZE = 40
 USE_GPU = True # Pour quand le GPU n'est pas disponible (mettre à False)
 
-def Fibonacci_CPU(n):
+def fibonacci_CPU(n):
     """
     Calculates the nth Fibonacci number.
 
@@ -28,7 +28,7 @@ def Fibonacci_CPU(n):
     elif n == 1 or n == 2:
         return 1
     else:
-        return Fibonacci_CPU(n-1) + Fibonacci_CPU(n-2)
+        return fibonacci_CPU(n-1) + fibonacci_CPU(n-2)
     
 def compile_Fibonacci_GPU():
     """
@@ -54,7 +54,7 @@ def compile_Fibonacci_GPU():
     fibonacci_kernel = mod.get_function("fibonacci_kernel")
     return fibonacci_kernel
 
-def Fibonacci_GPU(n, fibonacci_kernel):
+def fibonacci_GPU(n, fibonacci_kernel):
     """
     Calculates the nth Fibonacci number using the GPU.
 
@@ -88,7 +88,7 @@ def multiple_Fibonacci_CPU(n_number, max_size):
     y = []
     for size in range(0, max_size, max_size // n_number):
         start_time = time.time()
-        Fibonacci_CPU(size)
+        fibonacci_CPU(size)
         end_time = time.time()
         x.append(size)
         y.append(end_time - start_time)
@@ -109,7 +109,7 @@ def multiple_Fibonacci_GPU(n_number, max_size):
     x = []
     y = []
     for size in range(0, max_size, max_size // n_number):
-        time = Fibonacci_GPU(size, fibonacci_kernel)
+        time = fibonacci_GPU(size, fibonacci_kernel)
         x.append(size)
         y.append(time)
     return x, y, "GPU"
