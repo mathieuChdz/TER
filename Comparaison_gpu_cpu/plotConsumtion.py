@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import os
 import gpu_consumption as gc
 import consumption_daemon as daemon
+import fibonnaci as fib
+import sys
 
 def plot_consumption(size):
     
@@ -24,7 +26,7 @@ def draw(x, y, filename):
     plt.title('Matrix multiplication on CPU')
     plt.savefig(filename)
 
-def run_main(sizes):
+def run_mult_gpu(sizes):
 
     # On créer et on initialise le daemon
     deamon = daemon.Consumtion_daemon("consumption_daemon")
@@ -50,8 +52,18 @@ def run_main(sizes):
     draw(sizes, daemon_consumption, "graphs/gpu_consumption.png")
 
 if __name__ == "__main__":
-    sizes = [10000, 20000, 30000, 40000, 50000, 60000]
-    sizes_5000 = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000]
 
-    run_main(sizes)
-    # run_main(sizes_5000)
+    if len(sys.argv) != 2:
+        print("Usage: python3 plotConsumption.py <option>")
+        sys.exit(1)
+
+    option = sys.argv[1]
+
+    if option == "mult_gpu" or option == "1":
+        sizes = [10000, 20000, 30000, 40000, 50000, 60000]
+        sizes_5000 = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000]
+        run_mult_gpu(sizes)
+        # run_mult_gpu(sizes_5000)
+    
+    elif option == "fib" or option == "2":
+        pass
