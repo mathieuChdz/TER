@@ -1,5 +1,3 @@
-# Éléments de recherche
-
 ## Comment évaluer la puissance d'un LLM ?
 
 Il y a trois facteurs principaux :
@@ -23,33 +21,6 @@ Plus un modèle possède de paramètres, plus il peut gérer des tâches complex
 
 ### 3. La taille du trainset  
 Un dataset plus grand et plus diversifié améliore la capacité du modèle à généraliser et à fournir des réponses pertinentes.
-
----
-
-## Les environnements disponibles pour le développement sur GPU
-
-**Option principale : CUDA (Compute Unified Device Architecture)**  
-- Développé par NVIDIA  
-- Permet le calcul parallèle  
-
----
-
-## Outils nécessaires
-
-| Outil / Langage | Version | Commande | Installé |
-|----------------|---------|----------|----------|
-| Python        | 3.12.3  | `python3 --version` | OUI |
-| CUDA          | 12.2    | `nvidia-smi` ou `nvcc --version` |  OUI |
-
----
-
-## Programmation GPU en Python  
-
-**CuPy** :  
-- Une bibliothèque Python qui offre une syntaxe similaire à NumPy, mais optimisée pour les GPU.  
-- L'installation via `pip` ne fonctionne pas sur le serveur, car la distribution est gérée par le système.  
-- Les paquets ne sont pas gérés par `pip` mais par le gestionnaire de paquets de la distribution (probablement `apt`).  
-- L'erreur d’installation rencontrée vise à éviter les conflits entre `pip` et `apt`.  
 
 ---
 
