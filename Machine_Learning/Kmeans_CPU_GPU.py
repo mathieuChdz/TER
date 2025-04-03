@@ -1,52 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # K-means
-
-# <img src="./figures/kmeans.jpg" width="700px"/>
-
-# ## Exercice
-# 
-# 
-# ### Generate data
-# 1. Le code de cette section génère des data appartenant à 3 classes différentes.<br>
-#    Les clusters sont relativement séparés et devraient pouvoir être reconstruits de manière acceptable grâce à l'algorithme d'apprentissage non-supervisé des **K moyennes** ou **K-means**.<br>
-#    Comprenez ce code...
-#    
-#    
-# ### Model
-# 2. Compétez la méthode `_initialize_centroids(...)` qui, étant donné un ensemble de points `X` (**features**), retourne un array de $K$ centroïdes au hasard, où $K$ est le nombre de clusters désirés.
-# 
-# 
-# 3. Compétez la méthode `_assign_clusters(..)` qui, étant donné un ensemble de points `X` et un ensemble de $K$ centroïdes `centroids`, retourne la liste des clusters associée aux points de `X`. 
-# 
-#    Pour chaque point $x$ de `X`, on calcule sa distance $d_i$ à chacun des centroïde $c_i$ de `centroids`, et on lui assigne le cluster $i$ pour lequelle la distance $d_i$ est minimale.
-#         
-# 
-# 4. Compétez la méthode `_compute_centroids(...)` qui, étant donné un ensemble de points `X` et un ensemble de clusters correspondant `clusters`, recalcule les $K$ centroïdes `centroids` de ces clusters.
-# 
-#    Les $i$-ème centroïde $c_i$ correspond à la moyenne des points faisant partie cu cluster $i$.
-# 
-# 
-# 5. Compétez la méthode `fit()`qui, étant donné un ensemble de points `X`, implémente l'algorithme **$K$-means** assoocié aux data `X`. Cette méthode retourne les `clusters` et `centroids` calculés par l'algorithme ci-dessous:
-#     
-#    <img src="./figures/kmeans_algo.jpg" width="700px"/>
-# 
-# 
-# 6. Compétez la méthode `predict(...)` qui, étant donné un point `x_new`, calcule le cluster `c_new_hat` associée à ce point. La documentation de la méthode donne plus de détails.<br>
-# 
-# 
-# 
-# ### Results
-# 7. - Instanciez un **$K$-means** avec $K=3$;
-#    - Fittez votre algorithme sur les data `X`.
-#    - Faites le graphes de vos clusters. Les points qui sont prédits comme classe 1, classe 2 et classe 3 seront représentés de différentes couleurs.
-
-# ## Libraries
-
-# In[1]:
-
-
 from collections import Counter
 
 import pandas as pd
@@ -58,42 +9,11 @@ from sklearn.metrics import classification_report
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-sns.set_theme()
+import cupy as cp
 
-# ## Generate data
+# Model
 
-# In[2]:
-
-
-# generate data
-X, y = make_blobs(n_samples=500, n_features=2, centers=3, cluster_std=4.0, random_state=42)
-
-# In[3]:
-
-
-X.shape, y.shape
-
-# In[4]:
-
-
-# plot data
-plt.figure(figsize=(10, 6))
-
-plt.scatter(X[:, 0], X[:, 1],marker = 'x')
-plt.xlabel("X_1", fontsize=14)
-plt.ylabel("X_2", fontsize=14)
-# plt.legend(fontsize=14)
-plt.title("Data (unclustered)", fontsize=16)
-
-# plt.savefig("kmeans.jpg")
-plt.show()
-
-# ## Model
-
-# In[5]:
-
-
-class Kmeans():
+class KmeansCPU():
     """
     Implements the K-means algorithm.
     """
@@ -286,127 +206,9 @@ class Kmeans():
         
         return c_new_hat
 
-# ## Results
-
-# In[15]:
-
-
-kmeans = Kmeans(k=3)
-
-# In[16]:
-
-
-centroids = kmeans._initialize_centroids(X)
-
-# In[17]:
-
-
-centroids
-
-# In[18]:
-
-
-kmeans.fit(X, max_iter=100)
-clusters, centroids = kmeans.clusters, kmeans.centroids
-
-# In[19]:
-
-
-centroids
-
-# In[20]:
-
-
-# clusters
-
-# In[21]:
-
-
-kmeans.predict([-6.59672862, -6.42369954])
-
-# In[22]:
-
-
-# k-means clustering
-plt.figure(figsize=(10, 6))
-
-plt.scatter(X[clusters==0][:, 0], X[clusters==0][:, 1], 
-            color="C0", alpha=1, marker = 'x', label="class 0")
-plt.scatter(centroids[0][0], centroids[0][0], 
-            color="black", alpha=0.5, s=100)
-
-plt.scatter(X[clusters==1][:, 0], X[clusters==1][:, 1], 
-            color="C1", alpha=1, marker = 'x', label="class 1")
-plt.scatter(centroids[1][0], centroids[1][1], 
-            color="black", alpha=0.5, s=100)
-
-plt.scatter(X[clusters==2][:, 0], X[clusters==2][:, 1], 
-            color="C2", alpha=1, marker = 'x', label="class 2")
-plt.scatter(centroids[2][0], centroids[2][1], 
-            color="black", alpha=0.5, s=100, label="centroids")
-
-plt.xlabel("X_1", fontsize=14)
-plt.ylabel("X_2", fontsize=14)
-plt.legend(fontsize=14)
-plt.title("K-Means", fontsize=16)
-
-# plt.savefig("kmeans.jpg")
-plt.show()
-
-# In[23]:
-
-
-# original clusters
-plt.figure(figsize=(10, 6))
-
-plt.scatter(X[y==0][:, 0], X[y==0][:, 1], 
-            color="C0", alpha=1, marker = 'x', label="class 0")
-
-plt.scatter(X[y==1][:, 0], X[y==1][:, 1], 
-            color="C1", alpha=1, marker = 'x', label="class 1")
-
-plt.scatter(X[y==2][:, 0], X[y==2][:, 1], 
-            color="C2", alpha=1, marker = 'x', label="class 2")
-
-
-plt.xlabel("X_1", fontsize=14)
-plt.ylabel("X_2", fontsize=14)
-plt.legend(fontsize=14)
-plt.title("Original clusters", fontsize=16)
-
-# plt.savefig("kmeans.jpg")
-plt.show()
-
-# In[24]:
-
-
-# The algo might have permuted the clusters
-# original -> new
-# 0 -> ?
-# 1 -> ?
-# 2 -> ?
-
-# In[25]:
-
-
-y_new = -np.ones(X.shape[0])
-y_new[y==0] = 2
-y_new[y==1] = 1
-y_new[y==2] = 0
-
-# In[26]:
-
-
-print(classification_report(y_new, clusters))
-
 # EXECUTION EN GPU :
 
-# In[1]:
-
-
-import cupy as cp
-
-class Kmeans():
+class KmeansGPU():
     def __init__(self, k=3):
         self.k = k
         self.clusters = None
@@ -454,25 +256,85 @@ class Kmeans():
         c_new_hat = dist.argmin()
         return c_new_hat
 
-# In[ ]:
 
 
-kmeans = Kmeans(k=3)
+# ## Results
+# ### Execution in CPU
+def result_execution(X, y, k=3, bool_gpu=False):
+    """
+    Execute the K-means algorithm on the data X."
+    """
+    if bool_gpu:
+        X = cp.asarray(X)
+        y = cp.asarray(y)
+        kmeans = KmeansGPU(k=k)
+    else:
+        kmeans = KmeansCPU(k=k)
+    centroids = kmeans._initialize_centroids(X)
+    kmeans.fit(X, max_iter=100)
+    clusters, centroids = kmeans.clusters, kmeans.centroids
+    kmeans.predict([-6.59672862, -6.42369954])
+    
+    # plot_clusters(X, y, clusters, centroids)
+    # plot_original_cluster()
 
-# In[ ]:
+    y_new = -np.ones(X.shape[0])
+    y_new[y==0] = 2
+    y_new[y==1] = 1
+    y_new[y==2] = 0
+
+    print(classification_report(y_new, clusters))
+
+def plot_clusters(X, y, clusters, centroids):
+    plt.figure(figsize=(10, 6))
+    plt.scatter(X[clusters==0][:, 0], X[clusters==0][:, 1],
+                color="C0", alpha=1, marker = 'x', label="class 0")
+    plt.scatter(centroids[0][0], centroids[0][0],
+                color="black", alpha=0.5, s=100)
+    plt.scatter(X[clusters==1][:, 0], X[clusters==1][:, 1],
+                color="C1", alpha=1, marker = 'x', label="class 1")
+    plt.scatter(centroids[1][0], centroids[1][1],
+                color="black", alpha=0.5, s=100)
+    plt.scatter(X[clusters==2][:, 0], X[clusters==2][:, 1],
+                color="C2", alpha=1, marker = 'x', label="class 2")
+    plt.scatter(centroids[2][0], centroids[2][1],
+                color="black", alpha=0.5, s=100, label="centroids")
+    plt.xlabel("X_1", fontsize=14)
+    plt.ylabel("X_2", fontsize=14)
+    plt.legend(fontsize=14)
+    plt.title("K-Means", fontsize=16)
+    # plt.savefig("kmeansCPU.jpg")
+    plt.show()
+
+def plot_original_cluster():
+    # original clusters
+    plt.figure(figsize=(10, 6))
+
+    plt.scatter(X[y==0][:, 0], X[y==0][:, 1], 
+                color="C0", alpha=1, marker = 'x', label="class 0")
+
+    plt.scatter(X[y==1][:, 0], X[y==1][:, 1], 
+                color="C1", alpha=1, marker = 'x', label="class 1")
+
+    plt.scatter(X[y==2][:, 0], X[y==2][:, 1], 
+                color="C2", alpha=1, marker = 'x', label="class 2")
 
 
-centroids = kmeans._initialize_centroids(cp.array(X))
-centroids
+    plt.xlabel("X_1", fontsize=14)
+    plt.ylabel("X_2", fontsize=14)
+    plt.legend(fontsize=14)
+    plt.title("Original clusters", fontsize=16)
 
-# In[ ]:
-
-
-kmeans.fit(cp.array(X), max_iter=100)
-clusters, centroids = kmeans.clusters, kmeans.centroids
-centroids
-
-# In[ ]:
+    # plt.savefig("kmeans.jpg")
+    plt.show()
 
 
-kmeans.predict(cp.array([-6.59672862, -6.42369954]))
+if __name__ == "__main__":
+    sns.set_theme()
+
+    # generate data
+    X, y = make_blobs(n_samples=500, n_features=2, centers=3, cluster_std=4.0, random_state=42)
+    X.shape, y.shape
+
+    result_execution(X, y, k=3, bool_gpu=False)
+    result_execution(X, y, k=3, bool_gpu=True)
