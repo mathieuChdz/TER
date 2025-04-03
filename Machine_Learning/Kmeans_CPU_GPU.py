@@ -275,7 +275,7 @@ def result_execution(X, y, k=3, bool_gpu=False):
     clusters, centroids = kmeans.clusters, kmeans.centroids
     kmeans.predict([-6.59672862, -6.42369954])
     
-    # plot_clusters(X, y, clusters, centroids)
+    plot_clusters(X, y, clusters, centroids)
     # plot_original_cluster()
 
     y_new = -np.ones(X.shape[0])
@@ -303,7 +303,7 @@ def plot_clusters(X, y, clusters, centroids):
     plt.ylabel("X_2", fontsize=14)
     plt.legend(fontsize=14)
     plt.title("K-Means", fontsize=16)
-    # plt.savefig("kmeansCPU.jpg")
+    plt.savefig("Graphs/kmeans.jpg")
     plt.show()
 
 def plot_original_cluster():
@@ -325,7 +325,7 @@ def plot_original_cluster():
     plt.legend(fontsize=14)
     plt.title("Original clusters", fontsize=16)
 
-    # plt.savefig("kmeans.jpg")
+    # plt.savefig("Graphs/kmeans.jpg")
     plt.show()
 
 
@@ -333,7 +333,7 @@ if __name__ == "__main__":
     sns.set_theme()
 
     # generate data
-    X, y = make_blobs(n_samples=500, n_features=2, centers=3, cluster_std=4.0, random_state=42)
+    X, y = make_blobs(n_samples=50000, n_features=2, centers=3, cluster_std=4.0, random_state=42)
     X.shape, y.shape
 
     result_execution(X, y, k=3, bool_gpu=False)
