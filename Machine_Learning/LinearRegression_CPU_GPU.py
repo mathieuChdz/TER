@@ -9,6 +9,8 @@ from matplotlib import pyplot as plt
 
 import cupy as cp
 
+import time
+
 sns.set_theme()
 
 ## Generate data
@@ -237,6 +239,38 @@ def plot_with_predictions(X_train, y_train, X_test, y_test, y_pred_train, y_pred
     plt.show()
 
 
+def run_CPU(X_train, y_train, X_test, y_test):
+    # -------------- CPU -------------- 
+    lr_cpu = create_lr(use_gpu=False)
+
+    # print("CPU --> beta_hat before fit: ", lr_cpu.beta_hat)
+
+    # Fit the model
+    lr_cpu.fit(X_train, y_train)
+    # print("CPU --> beta_hat after fit: ", lr_cpu.beta_hat)
+
+    # Predict
+    y_hat = lr_cpu.predict(X_test)
+    # print("CPU --> y_hat : ", y_hat)
+
+    # plot_with_predictions(X_train, y_train, X_test, y_test, lr_cpu.predict(X_train), y_hat)
+
+def run_GPU(X_train, y_train, X_test, y_test):
+    # -------------- GPU -------------- 
+    lr_gpu = create_lr(use_gpu=True)
+
+    print("GPU --> beta_hat before fit: ", lr_gpu.beta_hat)
+    # Fit the model
+    lr_gpu.fit(cp.asarray(X_train), cp.asarray(y_train))
+    print("GPU --> beta_hat after fit: ", lr_gpu.beta_hat)
+
+    # Predict
+    y_hat_gpu = lr_gpu.predict(cp.asarray(X_test))
+
+    print("GPU --> y_hat : ", y_hat_gpu)
+    y_hat_gpu = cp.asnumpy(y_hat_gpu)  # Convert back to NumPy array for plotting
+    plot_with_predictions(X_train, y_train, X_test, y_test, cp.asnumpy(lr_gpu.predict(cp.asarray(X_train))), y_hat_gpu)
+
 # Training and Results
 
 if __name__ == "__main__":
@@ -252,35 +286,48 @@ if __name__ == "__main__":
 
     # Fit and predict
 
-    # -------------- CPU -------------- 
-    lr_cpu = create_lr(use_gpu=False)
+    # run_CPU(X_train, y_train, X_test, y_test)
 
-    print("CPU --> beta_hat before fit: ", lr_cpu.beta_hat)
+    # run_GPU(X_train, y_train, X_test, y_test)
 
-    # Fit the model
-    lr_cpu.fit(X_train, y_train)
-    print("CPU --> beta_hat after fit: ", lr_cpu.beta_hat)
 
-    # Predict
-    y_hat = lr_cpu.predict(X_test)
-    print("CPU --> y_hat : ", y_hat)
+    NB_ITERATION = 10
+    
+    result_global_mean_dict = {}
+    for i in range(500000, 5000000, 500000):
+        result_list_i = []
+        # On fait N fois l'execution de l'algorithme pour le même nombre de points
+        
+        for _ in range(NB_ITERATION):
+            print(".", end="")
+            start = time.time()
+            X, y, coeff = generate_data(n_samples=i, n_features=1, noise=30, bias=30, random_state=42)
 
-    plot_with_predictions(X_train, y_train, X_test, y_test, lr_cpu.predict(X_train), y_hat)
+            # train-test split
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # -------------- GPU -------------- 
-    lr_gpu = create_lr(use_gpu=True)
+            X_train.shape, y_train.shape, X_test.shape, y_test.shape
 
-    print("GPU --> beta_hat before fit: ", lr_gpu.beta_hat)
-    # Fit the model
-    lr_gpu.fit(cp.asarray(X_train), cp.asarray(y_train))
-    print("GPU --> beta_hat after fit: ", lr_gpu.beta_hat)
+            plot_train_train_sets(X_train, y_train, X_test, y_test)
 
-    # Predict
-    y_hat_gpu = lr_gpu.predict(cp.asarray(X_test))
+            # Fit and predict
 
-    print("GPU --> y_hat : ", y_hat_gpu)
-    y_hat_gpu = cp.asnumpy(y_hat_gpu)  # Convert back to NumPy array for plotting
-    plot_with_predictions(X_train, y_train, X_test, y_test, cp.asnumpy(lr_gpu.predict(cp.asarray(X_train))), y_hat_gpu)
+            run_CPU(X_train, y_train, X_test, y_test)
+            end = time.time()
+            result_list_i.append(end - start)
+
+
+        result_global_mean_dict[i] = np.mean(result_list_i)
+        print("mean time for ", i, " points: ", result_global_mean_dict[i])
+    
+    # On trace le temps d'execution en fonction du nombre de points
+    plt.figure(figsize=(10, 6))
+    plt.plot(list(result_global_mean_dict.keys()), list(result_global_mean_dict.values()), label="CPU")
+    plt.xlabel("Number of points", fontsize=14)
+    plt.ylabel(f"Execution time (s) (mean of {NB_ITERATION} iterations)", fontsize=14)
+    plt.legend(fontsize=14)
+    plt.title("Execution time of Linear Regression on CPU", fontsize=16)
+    plt.savefig("Graphs/LinearRegression_CPU_execution_time.jpg", bbox_inches='tight')
         
 
 

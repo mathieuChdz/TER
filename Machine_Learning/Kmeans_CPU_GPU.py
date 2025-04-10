@@ -11,6 +11,8 @@ from matplotlib import pyplot as plt
 
 import cupy as cp
 
+import time
+
 # Model
 
 class KmeansCPU():
@@ -163,17 +165,19 @@ class KmeansCPU():
         stop_dist = stop_dist * np.ones(shape=(self.k))
         centroids = self._initialize_centroids(X)
         
-        print("Fitting in progress:")
+        # print("Fitting in progress:")
         
         while (dist > stop_dist).any() and it <= max_iter:
             
-            print(".", end="")
+            # print(".", end="")
             clusters = self._assign_clusters(X, centroids)
             new_centroids = self._compute_centroids(X, clusters)
             dist = np.linalg.norm(centroids - new_centroids, axis=1)
             centroids = new_centroids
             it += 1
         
+        # print(" total itérations : ", it)
+
         self.clusters = clusters
         self.centroids = centroids
         
@@ -275,7 +279,7 @@ def result_execution(X, y, k=3, bool_gpu=False):
     clusters, centroids = kmeans.clusters, kmeans.centroids
     kmeans.predict([-6.59672862, -6.42369954])
     
-    plot_clusters(X, y, clusters, centroids)
+    # plot_clusters(X, y, clusters, centroids)
     # plot_original_cluster()
 
     y_new = -np.ones(X.shape[0])
@@ -283,7 +287,7 @@ def result_execution(X, y, k=3, bool_gpu=False):
     y_new[y==1] = 1
     y_new[y==2] = 0
 
-    print(classification_report(y_new, clusters))
+    # print(classification_report(y_new, clusters))
 
 def plot_clusters(X, y, clusters, centroids):
     plt.figure(figsize=(10, 6))
@@ -332,9 +336,31 @@ def plot_original_cluster():
 if __name__ == "__main__":
     sns.set_theme()
 
-    # generate data
-    X, y = make_blobs(n_samples=50000, n_features=2, centers=3, cluster_std=4.0, random_state=42)
-    X.shape, y.shape
+    NB_ITERATION = 10
+    
+    result_global_mean_dict = {}
+    for i in range(500000, 5000000, 500000):
+        result_list_i = []
+        # On fait N fois l'execution de l'algorithme pour le même nombre de points
+        
+        for _ in range(NB_ITERATION):
+            # generate data
+            X, y = make_blobs(n_samples=i, n_features=2, centers=3, cluster_std=4.0, random_state=42)
+            start = time.time()
+            result_execution(X, y, k=3, bool_gpu=False)
+            end = time.time()
+            result_list_i.append(end - start)
 
-    result_execution(X, y, k=3, bool_gpu=False)
-    result_execution(X, y, k=3, bool_gpu=True)
+        result_global_mean_dict[i] = np.mean(result_list_i)
+        print("mean time for ", i, " points: ", result_global_mean_dict[i])
+    
+    # On trace le temps d'execution en fonction du nombre de points
+    plt.figure(figsize=(10, 6))
+    plt.plot(list(result_global_mean_dict.keys()), list(result_global_mean_dict.values()), label="CPU")
+    plt.xlabel("Number of points", fontsize=14)
+    plt.ylabel(f"Execution time (s) (mean of {NB_ITERATION} iterations)", fontsize=14)
+    plt.legend(fontsize=14)
+    plt.title("Execution time of K-means algorithm in CPU", fontsize=16)
+    plt.savefig("Graphs/kmeans_cpu_executions_times.jpg")
+
+    # result_execution(X, y, k=3, bool_gpu=True)
