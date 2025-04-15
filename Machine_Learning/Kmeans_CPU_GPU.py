@@ -242,9 +242,9 @@ class KmeansGPU():
         dist = cp.inf * cp.ones(shape=(self.k))
         stop_dist = stop_dist * cp.ones(shape=(self.k))
         centroids = self._initialize_centroids(X)
-        print("Fitting in progress:")
+        # print("Fitting in progress:")
         while (dist > stop_dist).any() and it <= max_iter:
-            print(".", end="")
+            # print(".", end="")
             clusters = self._assign_clusters(X, centroids)
             new_centroids = self._compute_centroids(X, clusters)
             dist = cp.linalg.norm(centroids - new_centroids, axis=1)
@@ -254,6 +254,7 @@ class KmeansGPU():
         self.centroids = centroids
 
     def predict(self, x_new):
+        x_new = cp.asarray(x_new)
         dist = cp.zeros(shape=(self.k))
         for i in range(self.k):
             dist[i] = cp.linalg.norm(x_new - self.centroids[i])
@@ -282,7 +283,11 @@ def result_execution(X, y, k=3, bool_gpu=False):
     # plot_clusters(X, y, clusters, centroids)
     # plot_original_cluster()
 
-    y_new = -np.ones(X.shape[0])
+    if bool_gpu:
+        y_new = -cp.ones(X.shape[0])
+    else:
+        y_new = -np.ones(X.shape[0])
+
     y_new[y==0] = 2
     y_new[y==1] = 1
     y_new[y==2] = 0
@@ -337,30 +342,43 @@ if __name__ == "__main__":
     sns.set_theme()
 
     NB_ITERATION = 10
-    
-    result_global_mean_dict = {}
-    for i in range(500000, 5000000, 500000):
+    point_range = range(500000, 5000001, 500000)
+
+    # Results for CPU
+    result_global_mean_dict_cpu = {}
+    for i in point_range:
         result_list_i = []
-        # On fait N fois l'execution de l'algorithme pour le même nombre de points
-        
         for _ in range(NB_ITERATION):
-            # generate data
+            # Generate data
             X, y = make_blobs(n_samples=i, n_features=2, centers=3, cluster_std=4.0, random_state=42)
             start = time.time()
             result_execution(X, y, k=3, bool_gpu=False)
             end = time.time()
             result_list_i.append(end - start)
+        result_global_mean_dict_cpu[i] = np.mean(result_list_i)
+        print("CPU mean time for ", i, " points: ", result_global_mean_dict_cpu[i])
 
-        result_global_mean_dict[i] = np.mean(result_list_i)
-        print("mean time for ", i, " points: ", result_global_mean_dict[i])
-    
-    # On trace le temps d'execution en fonction du nombre de points
+    # Results for GPU
+    result_global_mean_dict_gpu = {}
+    for i in point_range:
+        result_list_i = []
+        for _ in range(NB_ITERATION):
+            # Generate data
+            X, y = make_blobs(n_samples=i, n_features=2, centers=3, cluster_std=4.0, random_state=42)
+            start = time.time()
+            result_execution(X, y, k=3, bool_gpu=True)
+            end = time.time()
+            result_list_i.append(end - start)
+        result_global_mean_dict_gpu[i] = np.mean(result_list_i)
+        print("GPU mean time for ", i, " points: ", result_global_mean_dict_gpu[i])
+
+    # Plot results
     plt.figure(figsize=(10, 6))
-    plt.plot(list(result_global_mean_dict.keys()), list(result_global_mean_dict.values()), label="CPU")
+    plt.plot(list(result_global_mean_dict_cpu.keys()), list(result_global_mean_dict_cpu.values()), label="CPU", marker='o')
+    plt.plot(list(result_global_mean_dict_gpu.keys()), list(result_global_mean_dict_gpu.values()), label="GPU", marker='.')
     plt.xlabel("Number of points", fontsize=14)
     plt.ylabel(f"Execution time (s) (mean of {NB_ITERATION} iterations)", fontsize=14)
     plt.legend(fontsize=14)
-    plt.title("Execution time of K-means algorithm in CPU", fontsize=16)
-    plt.savefig("Graphs/kmeans_cpu_executions_times.jpg")
-
-    # result_execution(X, y, k=3, bool_gpu=True)
+    plt.title("Execution time of K-means algorithm (CPU vs GPU)", fontsize=16)
+    plt.savefig("Graphs/kmeans_cpu_vs_gpu_execution_times.jpg")
+    plt.show()
