@@ -11,6 +11,10 @@ Dans ce rapport, nous analysons les performances des CPU et GPU pour l'exécutio
 À noter :
 - Le temps d'exécution moyen calculé est arrondi à la 5e décimale près
 - __10 exécutions__ d'un même N sample pour constituer le temps d'exécution moyen
+- Formule de l'amélioration GPU : 
+$$
+\left( \frac{ValGPU - ValCPU}{ValCPU} \right) \times 100
+$$
 
 ### 1 - KMEANS
 
