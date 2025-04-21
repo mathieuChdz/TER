@@ -214,3 +214,20 @@ cudaMalloc((void**)&gpuTemp, size * sizeof(int));
 
 
 ## RAPIDS
+
+C'est quoi rapids ?
+
+RAPIDS est un ensemble de bibliothèques (open-source) développé par NVIDIA, pour accélérer les executions via GPU. Rapids se base et utilise NVIDIA CUDA ainsi que Apache Arrow pour l'accélération GPU. Plus précisément, retrouve :
+
+## RAPIDS : Utilisation de CUDA et Apache Arrow
+
+| **Technologie** | **Description** |
+|------------------|------------------|
+| **CUDA** | Plateforme de calcul parallèle développée par NVIDIA. Permet d'exploiter la puissance des GPU pour effectuer des calculs massivement parallèles (traitement de données, apprentissage machine, ...) |
+| **Apache Arrow** | Framework open-source conçu pour optimiser le traitement et le partage de données en mémoire (format de données très performant). Le format est un tableau en colonnes --> réduit les coûts de sérialisation et de désérialisation.|
+
+Cette combinaison permet d'accélérer les workflows de science des données (accéléreration des processus de traitement des données).
+
+Il est conçu pour fonctionner de manière similaire aux outils populaires comme Pandas ou Scikit-learn, mais en exploitant la puissance des GPU au maximum pour de meilleurs performances.
+
+
