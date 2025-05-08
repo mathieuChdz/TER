@@ -21,9 +21,9 @@ def unload_model(model, tokenizer):
     torch.cuda.synchronize()
     torch.cuda.empty_cache()
 
-def use_model(model, tokenizer):
-    
-    prompt = "Ecrit un rapport détaillé sur le sujet suivant : " \
+def get_prompt(id):
+    if id == 1:
+        prompt = "Ecrit un rapport détaillé sur le sujet suivant : " \
              " 'GPU et outils de développement" \
              " Les GPU sont de plus en plus utilisés pour accélérer les calculs dans les applications." \
              " L’objectif de ce projet est d’étudier les outils et les techniques mis en œuvre pour développer/monitorer ce type de processeurs." \
@@ -38,8 +38,25 @@ def use_model(model, tokenizer):
             "   - Machine Learning" \
             "   - Comparaison CPU vs GPU" \
             "Ce rapport doit être écrit en markdown. Ajoute un sommaire avec titre et des sous partie si nécéssaire."
-    
-              
+    elif id == 2:
+        prompt = "Ecrit un rapport détaillé sur le sujet suivant : " \
+             " 'GPU et outils de développement" \
+             " Les GPU sont de plus en plus utilisés pour accélérer les calculs dans les applications." \
+             " L’objectif de ce projet est d’étudier les outils et les techniques mis en œuvre pour développer/monitorer ce type de processeurs." \
+             " Les tâches à réaliser sont donc :" \
+                " - étudier les environnements disponibles pour le développement sur GPU " \
+                " - mettre en place un environnement de test " \
+                " - implémenter quelques algorithmes et mesurer leur efficacité ' " \
+            " Les points à aborder sont également : :" \
+                " - (intro) que peut-on faire avec des GPU (modèles locaux, ...) ?" \
+                " - comment développer sur GPU (langages, bibliothèques, outils, ...) ?" \
+                " - expérimentations réalisées sur le serveur équipé de gpus" \
+            "Ce rapport doit être écrit en markdown. Ajoute un sommaire avec titre et des sous partie si nécéssaire. Détaille bien tout, il faut un rapport assez complet." \
+            "Dernière précision : Nous avons donc accès à un serveur équipé de 2 GPU NVIDIA H100 NVL"
+    return prompt
+
+def use_model(model, tokenizer, id_prompt=1):
+    prompt = get_prompt(id_prompt)
 
     chat = [{"role": "user", "content": prompt},]
     inputs = tokenizer.apply_chat_template(chat, return_tensors="pt")
@@ -60,11 +77,12 @@ def use_model(model, tokenizer):
 
 
 if __name__ == "__main__":
+    id_prompt = 2
     
     model_id = "codellama/CodeLlama-7b-Instruct-hf"
 
     model, tokenizer = load_model(model_id)
     try :
-        use_model(model, tokenizer)
+        use_model(model, tokenizer, id_prompt)
     finally :
         unload_model(model, tokenizer)
