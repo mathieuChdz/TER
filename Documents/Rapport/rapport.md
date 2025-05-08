@@ -253,7 +253,9 @@ __TODO__
 
 Un kernel est une fonction qui s'execute sur GPU et non pas sur CPU. Ces derniers sont écrits en C/C++ et utilise CUDA (plateforme de calcul parallèle). Cela nous permet de paralléliser quand on le souhaite des opérations et ainsi accélérer l'execution d'un programme.
 
-Pour créer un kernel, il faut utiliser le mot-clé *`__global__`*. Lors de l'execution, le CPU sera qu'est-ce qui faut envoyé au GPU.
+Pour créer un kernel, il faut utiliser le mot-clé *`__global__`*. Lors de l'execution, le CPU sera capable de savoir ce qu'il faut envoyer au GPU.
+
+À noter : Il est nécéssaire de gérer manuellement l'utilisation de la mémoire. De plus, il faut une bonne gestion des threads, des blocs et de la grille GPU.
 
 #### Avantages des kernels :
 
@@ -263,6 +265,18 @@ Pour créer un kernel, il faut utiliser le mot-clé *`__global__`*. Lors de l'ex
 - Très éfficace lorque c'est bien utilisé
 
 ### Exemple de programmation cuda (bout de codes):
+
+```c
+// Kernel d'une addition de deux tableaux
+__global__ void add(int* a, int* b, int* c, int size) 
+{
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    if (index < size) 
+    {
+        c[index] = a[index] + b[index];
+    }
+}
+```
 
 ```c
 // Affichage d'un array
