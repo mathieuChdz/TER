@@ -243,6 +243,8 @@ Voir un exemple fonctionnel avec des options réduites : [Cliquez ici](../../llm
 Guide : https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html
 Documentation : https://pytorch.org/docs/stable/index.html
 
+Il devrait être possible d'utilsier une extension vscode (par exemple continue) avec une api pour les llm installés sur le serveur pour pouvoir les utiliser directement dans vscode mais nous ne l'avons pas testé car nous avons recherché d'autres choses et que ce n'était pas notre but principal.
+
 #### TensorFlow
 
 __TODO__ 
