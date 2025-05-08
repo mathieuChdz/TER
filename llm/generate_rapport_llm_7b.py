@@ -2,6 +2,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import transformers
 import torch
 import re
+import datetime
+import os
 
 def load_model(model_id):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -46,7 +48,13 @@ def use_model(model, tokenizer):
     output = output[0].to("cpu")
     response = tokenizer.decode(output, skip_special_tokens=True)
     response = re.sub(r'\[INST\].*?\[\/INST\]', '', response).strip()
-    with open("rapport_ia.md", "w", encoding="utf-8") as file:
+    
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    directory = os.path.expanduser("~/TER/llm/rapport_fait_avec_llm")
+    os.makedirs(directory, exist_ok=True)
+    filename = os.path.join(directory, f"rapport_llm_{timestamp}.md")
+
+    with open(filename, "w", encoding="utf-8") as file:
         file.write(response)
     print(f"Model: {response}\n")
 
