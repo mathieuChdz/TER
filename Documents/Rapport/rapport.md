@@ -156,18 +156,13 @@ PyTroch est la bibliothèque que nous avons utilisé pour tester les llm mais el
 |:--------------|
 | Calcul différentiable |
 | Optimisation numérique |
-| Simulation de système physiques/mécaniques |
-| Simulation sotchasitque/aléatoire |
-| Inversion de modèles physique |
-| Modélisation biologique/neuroscientifique |
 | Traitement de signal (image/audio) |
-| Apprentissage par renforcement |
+| Machine Learning et Deep Learning |
 | Modèles séquentiels/séries temporelles |
-| Apprentissage sur graphe |
 | Modèles probabilistes |
 | Calcul scientifique GPU généralisé (en tensoriel) |
 
-Dans notre cas, nous avons utilisé la parite de PyTorch dédié à l'entrainement et à l'utilisation de modèles de machine learning.
+Dans notre cas, nous avons utilisé la partie de PyTorch dédié au Machine Learning et Deep learning pour utiliser des llm.
 
 
 
