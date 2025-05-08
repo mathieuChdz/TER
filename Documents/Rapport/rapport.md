@@ -163,13 +163,82 @@ PyTroch est la bibliothèque que nous avons utilisé pour tester les llm mais el
 | Calcul scientifique GPU généralisé (en tensoriel) |
 
 Dans notre cas, nous avons utilisé la partie de PyTorch dédié au Machine Learning et Deep learning pour utiliser des llm.
+Pour les llm nous avons également eu besoin de la bibliothèque transformers.
+
+Voici les étapes pour utiliser un llm :
+
+1. Choisir un modèle pré entrainé (nous sommes allés sur https://huggingface.co/spaces/bigcode/bigcode-models-leaderboard). Les modèles ne peuvent en général pas tout tout faire (code completion, infilling, instructions/chat) il faut donc bien choisir le bon llm en fonction des besoin.  
+La taille des modèles est également importante, elle est exprimée en milliards de paramètres (7b : 7 milliards, 70b : 70 milliards), plus il y a de paramètre plus le modèle devrait être performant (meilleures réponses) au prix de d'une plus grande taille sur disque, d'une consommation accrue des ressources matérielles et d'un temps de réponse plus long (en fonction de la performance de la machine sur laquelle il a été lancé).
 
 
+2. Charger le tokenizer : transforme le texte brut en tokens (unités compréhensible pour le modèle)
 
-__TODO__ : détailler comment utiliser PyTorch dans notre cas
-Modèles pour coder : https://huggingface.co/spaces/bigcode/bigcode-models-leaderboard
+    ```py
+    tokenizer = AutoTokenizer.from_pretrained(
+        "gpt2",                      # id modèle
+        model_max_length=1024,       # longueur max des tokens (par défaut : None)
+        use_fast=True                # tokenizer rapide basé sur Rust (par défaut (Python) : False)
+    )
+    ```
 
+3. Charger le modèle
 
+    ```py
+    model = AutoModelForCausalLM.from_pretrained(
+        "gpt2",                       # id modèle
+        torch_dtype=torch.float16,    # précision (torch.float32 : standard, torch.float16 : mixte, auto : optimal)
+        device_map="auto",            # répartition automatique sur les GPU ("cpu" pour utiliser le cpu)
+        low_cpu_mem_usage=True,       # réduction de l'utilisation de la mémoire CPU (désactiver : false)
+        revision="main",              # pour utiliser une version spécifique (par exemple : "v1.0")
+        trust_remote_code=False,      # autorise l'exécution de code distant (pour modèles personalisés)
+        offload_folder=None           # répertoire de déchargement de parties du modèle sur disque
+    )
+    ```
+
+4. Préparer les données d'entrée
+
+    ```py
+    inputs = tokenizer(
+        "Bonjour, comment vas-tu ?",  # texte d'entrée / input ou code à compléter ou code avec partie manquante à compléter (peu nécésiter une balise en fonction du modèle, exemple : "<mask>" à l'endroit de la partie manquante)
+        padding=True,                 # tool : Ajoute du padding pour toujours avoir la même taille
+        truncation=True,              # Tronque si la séquence est trop longue
+        max_length=128,               # Longueur max des séquences (par défaut : None)
+        add_special_tokens=True,      # Ajoute les tokens spéciaux nécessaires au modèle
+        stride=50,                    # Chevauchement entre les morceaux de séquences (utile pour les textes longs)
+        return_tensors="pt"           # On spécifie les tenseurs que l'on retourne ("pt" pour PyTorch, "tf" pour TensorFlow, "np" pour NumPy)
+    ).to("cuda")                      # Transfère les données sur le GPU
+    ```
+
+5. Générer une réponse
+
+    ```py
+    output = model.generate(
+        inputs["input_ids"],          # ids tokens d'entrée
+        max_new_tokens=50,            # limite la longueur de la réponse générée
+        temperature=0.7,              # créativité (valeurs plus élevées = plus de diversité, 1.0 = neutre)
+        top_k=50,                     # limite aux 50 tokens les plus probables (None pour désactiver)
+        top_p=0.9,                    # limite aux tokens dont la probabilité cumulée est < 0.9 (1.0 pour désactiver)
+        do_sample=True,               # échantillonnage aléatoire
+        num_return_sequences=1,       # nb réponses retournées
+        repetition_penalty=1.2,       # pénalise les répétitions (1.0 pour désactiver)
+        length_penalty=1.0,           # pénalise ou favorise les réponses longues (1.0 = neutre, >1 favorise les longues, <1 favorise les courtes)
+        early_stopping=True           # arrêter ou non la génération dès qu'un token de fin est généré
+    )
+    ```
+
+6. Décoder la réponse
+
+    ```py
+    response = tokenizer.decode(
+        output[0],                    # séquence de tokens générée
+        skip_special_tokens=True,     # ignorer ou non les tokens spéciaux
+        clean_up_tokenization_spaces=True  # clean ou non les espaces inutiles
+    )
+    ```
+
+Tous les arguments pour ces fonction ne sont pas obligatoire, on peut utiliser l'option par défaut et donc ne pas mettre ceux dont on a pas besoin.
+
+Voir un exemple fonctionnel avec des options réduites : [Cliquez ici](../../llm/llm.py)
 
 Guide : https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html
 Documentation : https://pytorch.org/docs/stable/index.html
@@ -181,10 +250,19 @@ __TODO__
 <h2 id="utilisation-gpu-en-c-c++">Utilisation GPU en C/C++</h2>
 
 ### Utilisation de kernels
-    
-__TODO__ explication d'un kernel et aventages
 
-#### Exemple de programmation cuda (bout de code):
+Un kernel est une fonction qui s'execute sur GPU et non pas sur CPU. Ces derniers sont écrits en C/C++ et utilise CUDA (plateforme de calcul parallèle). Cela nous permet de paralléliser quand on le souhaite des opérations et ainsi accélérer l'execution d'un programme.
+
+Pour créer un kernel, il faut utiliser le mot-clé *`__global__`*. Lors de l'execution, le CPU sera qu'est-ce qui faut envoyé au GPU.
+
+#### Avantages des kernels :
+
+- Parallèlisme très élevé
+- Réduction du temps de calcul (via le parallélisme)
+- Peut être avantageux niveau énergetique (consommation watts)
+- Très éfficace lorque c'est bien utilisé
+
+### Exemple de programmation cuda (bout de codes):
 
 ```c
 // Affichage d'un array
@@ -224,6 +302,20 @@ RAPIDS est un ensemble de bibliothèques (open-source) développé par NVIDIA, p
 Cette combinaison permet d'accélérer les workflows de science des données (accéléreration des processus de traitement des données).
 
 Il est conçu pour fonctionner de manière similaire aux outils populaires comme Pandas ou Scikit-learn, mais en exploitant la puissance des GPU au maximum pour de meilleurs performances.
+
+### Graphs
+
+#### cuGraph
+
+cuGraph est une bibliothèque de graphes disponible dans RAPIDS. Elle permet d'exécuter des algorithmes de graphes sur GPU, ce qui améliore considérablement les performances par rapport aux implémentations CPU.
+
+cuGraph est disponible en tant que backend de NetworksX (la bibliothèque de graphes Python populaire) en utilisant nx-cugraph. Il suffit de mettre la variable d'environnement NX_CUGRAPH_AUTOCONFIG à True pour utiliser cuGraph comme backend sans changer le code écrit avec NetworkX.
+
+La liste des algorithmes disponibles dans cuGraph (assez longue) est disponible [ici](https://docs.rapids.ai/api/cugraph/stable/nx_cugraph/supported-algorithms/).
+
+Il n'y a rien de particulièrement compliqué pour lancer ces algorithmes car tout est déjà implémenté. Il faut juste configurer les paramètres d'entrée (graph et autres) correctement.   
+Des exemples de comment exécuter les algorithmes sont disponibles sur le github de cuGraph [ici](https://github.com/rapidsai/cugraph/tree/main/notebooks/algorithms).
+
 
 ### Machine Learning
 
