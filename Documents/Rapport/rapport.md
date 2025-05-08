@@ -209,3 +209,41 @@ cudaMalloc((void**)&gpuTemp, size * sizeof(int));
 
 
 ## RAPIDS
+
+C'est quoi rapids ?
+
+RAPIDS est un ensemble de bibliothèques (open-source) développé par NVIDIA, pour accélérer les executions via GPU. Rapids se base et utilise NVIDIA CUDA ainsi que Apache Arrow pour l'accélération GPU. Plus précisément, retrouve :
+
+## RAPIDS : Utilisation de CUDA et Apache Arrow
+
+| **Technologie** | **Description** |
+|------------------|------------------|
+| **CUDA** | Plateforme de calcul parallèle développée par NVIDIA. Permet d'exploiter la puissance des GPU pour effectuer des calculs massivement parallèles (traitement de données, apprentissage machine, ...) |
+| **Apache Arrow** | Framework open-source conçu pour optimiser le traitement et le partage de données en mémoire (format de données très performant). Le format est un tableau en colonnes --> réduit les coûts de sérialisation et de désérialisation.|
+
+Cette combinaison permet d'accélérer les workflows de science des données (accéléreration des processus de traitement des données).
+
+Il est conçu pour fonctionner de manière similaire aux outils populaires comme Pandas ou Scikit-learn, mais en exploitant la puissance des GPU au maximum pour de meilleurs performances.
+
+### Machine Learning
+
+#### cuML
+
+cuML est une bibliothèque de machine learning disponible dans RAPIDS. On l'utilise ici pour exploiter la puissance des GPU afin d'améliorer les performances des training de modèles de machine learning. Elle s'utilise de la même facon que scikit-learn.
+
+Avec cuML, il est possible d'exécuter rapidement des algorithmes tels que :
+- Régression linéaire et logistique
+- Clustering (KMEANS)
+- Classification
+- Autres
+
+L'avantage de cuML est que l'entrainement des modèle peut aller jusqu'à 50 fois plus vite. Cela permet d'avoir plus de temps pour optimiser son modèle sans avoir un problème de temps d'attente entre chaque entrainement.
+
+[Pour en savoir plus sur cuML](https://rapids.ai/cuml-accel/)
+
+Pour tester et comparer les performances CPU vs GPU vs GPU avec cuML, des modèles de machines learning étudiés et travaillés en 2ème et 3ème année de BUT informatique ont été sélectionnés. On y retrouve :
+- Régression Linéaire
+- KMEANS
+- Descente de gradient
+
+Voir document de test de performance (temps d'execution) sur différents modèles de machine learning [Cliquez ici](../machine_learning_CPU_vs_GPU.md)

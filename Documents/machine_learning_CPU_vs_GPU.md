@@ -63,7 +63,7 @@ $$
 | 4 500 000 | NEED TO DO | NEED TO DO |  |
 
 
-### 2 - DESCENTE DE GRADIANT
+### 3 - DESCENTE DE GRADIENT
 
 | Paramètres / Présets fixes | Valeur |
 |:----------|:----------:|
