@@ -26,6 +26,15 @@ int main() {
     cudaMalloc(&d_array1, N/2 * sizeof(float));
     cudaMalloc(&d_result1, sizeof(float));
 
+    float zero = 0.0f;
+
+    cudaSetDevice(0);
+    cudaMemcpy(d_result0, &zero, sizeof(float), cudaMemcpyHostToDevice);
+
+    cudaSetDevice(1);
+    cudaMemcpy(d_result1, &zero, sizeof(float), cudaMemcpyHostToDevice);
+
+
     // 2. Copie les données (moitié sur chaque GPU)
     cudaSetDevice(0);
     cudaMemcpy(d_array0, h_array, N/2 * sizeof(float), cudaMemcpyHostToDevice);
@@ -45,8 +54,10 @@ int main() {
     // 4. Synchronise et récupère les résultats
     float sum0, sum1;
     cudaSetDevice(0);
+    cudaDeviceSynchronize();
     cudaMemcpy(&sum0, d_result0, sizeof(float), cudaMemcpyDeviceToHost);
     cudaSetDevice(1);
+    cudaDeviceSynchronize();
     cudaMemcpy(&sum1, d_result1, sizeof(float), cudaMemcpyDeviceToHost);
 
     float totalSum = sum0 + sum1;
