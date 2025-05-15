@@ -6,6 +6,8 @@
     - [LLM](#llm)
 - [C/C++ via GPU](#utilisation-gpu-en-c-c++)
 - [RAPIDS](#rapids)
+- [Machine Learning : CuML](#machine-learning)
+
 
 ---
 
@@ -244,10 +246,6 @@ Guide : https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html
 Documentation : https://pytorch.org/docs/stable/index.html
 
 Il devrait être possible d'utilsier une extension vscode (par exemple continue) avec une api pour les llm installés sur le serveur pour pouvoir les utiliser directement dans vscode mais nous ne l'avons pas testé car nous avons recherché d'autres choses et que ce n'était pas notre but principal.
-
-#### TensorFlow
-
-__TODO__ 
 
 <h2 id="utilisation-gpu-en-c-c++">Utilisation GPU en C/C++</h2>
 
@@ -589,3 +587,50 @@ Pour tester et comparer les performances CPU vs GPU vs GPU avec cuML, des modèl
 - Descente de gradient
 
 Voir document de test de performance (temps d'execution) sur différents modèles de machine learning [Cliquez ici](../machine_learning_CPU_vs_GPU.md)
+
+## Autres bibliothèques python 
+
+- **Numba** : bibliothèque de compilation de code python qui utilise le GPU. Son objectif ici est de pouvoir utiliser le GPU sans avoir à écrire du CUDA top poussé.
+[Plus d'informations ici](https://numba.pydata.org/)
+
+- **cuDF** : bibliothèque de dataframe pour GPU (se base, comme pour **cuML**, sur *Apache Arrow*).
+[Plus d'informations ici](https://docs.rapids.ai/api/cudf/stable/)
+
+- **rmn** : sert pour la gestion de mémoire GPU (RAPIDS Memory Manager).
+[Plus d'informations ici](https://docs.rapids.ai/api/rmm/stable/guide/)
+
+- ### Machine Learning :
+    - **tensorflow** : [Informations ici](https://www.tensorflow.org/?hl=fr)
+    
+    - **onnxruntime** : [Informations ici](https://onnxruntime.ai/)
+
+- ### Traitement d'image et vision par ordinateur :
+    - **opencv** : [Informations ici](https://opencv.org/)
+
+    - **nvidia DALI** : Utiliser pour de l'entrainement IA sur GPU
+    [Informations ici](https://developer.nvidia.com/dali)
+
+    - **nvidia VPI** : Traitement en temps réel de flux vidéo
+    [Informations ici](https://docs.nvidia.com/vpi/index.html)
+
+- ### Traitement de signal audio et video :
+    - **cusignal** : SciPy pour GPU
+    [Informations ici](https://developer.nvidia.com/blog/accelerated-signal-processing-with-cusignal/)
+
+    - **Torch audio** : [Informations ici](https://docs.pytorch.org/audio/stable/index.html)
+
+
+- **hoomd-blue** : Simulation de système de particule.
+[Informations ici](https://hoomd-blue.readthedocs.io/en/v5.2.0/)
+
+- **nvidia warp** : Permet la simulation de physique (ex : aérodynamisme, chute d'objets).
+[Informations ici](https://nvidia.github.io/warp/)
+
+- **vispy** : Bibliothèque qui sert à la visualisation interactive (2D/3D) de données.
+[Informations ici](https://vispy.org/)
+
+- **cuQuantum** : Sert au calcul quantique
+[Informations ici](https://developer.nvidia.com/cuquantum-sdk)
+
+- **nvtabular**: Utile pour faire des systèmes de recommendations en GPU (donc accélérés)
+[Informations ici](https://developer.nvidia.com/nvidia-merlin/nvtabular)
