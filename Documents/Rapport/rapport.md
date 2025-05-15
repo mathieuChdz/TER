@@ -253,11 +253,15 @@ __TODO__
 
 ### Utilisation de kernels
 
-Un kernel est une fonction qui s'execute sur GPU et non pas sur CPU. Ces derniers sont écrits en C/C++ et utilise CUDA (plateforme de calcul parallèle). Cela nous permet de paralléliser quand on le souhaite des opérations et ainsi accélérer l'execution d'un programme.
+Un kernel est une fonction qui s'exécute sur le GPU et non sur le CPU. Ces fonctions sont écrites en C/C++ et utilisent CUDA, une plateforme de calcul parallèle.
 
-Pour créer un kernel, il faut utiliser le mot-clé *`__global__`*. Lors de l'execution, le CPU sera capable de savoir ce qu'il faut envoyer au GPU.
+Cela permet de paralléliser, à volonté, certaines opérations et ainsi d’accélérer l'exécution d'un programme. Pour créer un kernel, il faut utiliser le mot-clé *`__global__`*. Lors de l'exécution, le CPU est capable de déterminer ce qu'il doit envoyer au GPU.
 
-À noter : Il est nécéssaire de gérer manuellement l'utilisation de la mémoire. De plus, il faut une bonne gestion des threads, des blocs et de la grille GPU.
+À noter : il est nécessaire de gérer manuellement l'utilisation de la mémoire. De plus, une bonne gestion des threads, des blocs et de la grille GPU est indispensable.
+
+(Un thread est une unité de base, représentant par exemple un élément d’un tableau ; un bloc est un groupe de threads ; une grille est un ensemble de blocs.)
+
+
 
 #### Avantages des kernels :
 
@@ -266,7 +270,8 @@ Pour créer un kernel, il faut utiliser le mot-clé *`__global__`*. Lors de l'ex
 - Peut être avantageux niveau énergetique (consommation watts)
 - Très éfficace lorque c'est bien utilisé
 
-### Exemple de programmation cuda (bout de codes):
+
+##### Exemple de programmation cuda (bout de codes):
 
 ```c
 // Kernel d'une addition de deux tableaux
@@ -279,26 +284,255 @@ __global__ void add(int* a, int* b, int* c, int size)
     }
 }
 ```
+En **Python**, pour utiliser un kernel, on a recours à des fonctions toutes faites, comme par exemple `cupy.matmul()`.
+
+En revanche, en **C/C++**, on peut écrire directement une fonction pour le kernel CUDA qui s’exécute sur le GPU, ce qui permet d’effectuer des optimisations précises et d’avoir un contrôle total.
+
+> On peut également utiliser PyCUDA pour envoyer du code C/C++ (sous forme de chaîne de caractères) au compilateur `nvcc`, puis l’appeler depuis Python, si l’on souhaite écrire une fonction kernel en C/C++ tout en travaillant en Python.
+
+Le **GPU** exécute des milliers de threads en parallèle.
+
+En **Python**, les bibliothèques comme Cupy gèrent automatiquement les threads : un simple `cupy.add(a, b)` suffit. Cupy n’est ici qu’un exemple parmi d’autres bibliothèques capables d’exploiter les GPU.
+
+En **C/C++**, c’est au développeur de décider combien de threads lancer et comment les organiser.
+
+En **Python**, des bibliothèques comme Cupy gèrent directement l’exécution sur le GPU.
+
+En **C/C++**, il faut gérer manuellement plusieurs étapes :
+
+1. **Allouer de la mémoire avec `cudaMalloc()`**  
+   Cette étape est nécessaire pour stocker les données que le kernel CUDA devra traiter.
+
+   Exemple de syntaxe :
 
 ```c
-// Affichage d'un array
-void printArray(int* arr, int size) 
-{
-    for (int i = 0; i < size; ++i)
-        std::cout << arr[i] << " ";
-    std::cout << std::endl;
+   cudaError_t cudaMalloc(void** devPtr, size_t size);
+```
+- `devPtr` : pointeur vers la variable qui stockera l’adresse sur le GPU  
+- `size` : taille en octets à allouer
+
+2. **Copier les données du CPU vers le GPU  avec `cudaMemcpy()`**
+(nécessaire pour envoyer les entrées au GPU et récupérer les résultats)
+
+Ensuite, il faut libérer la mémoire avec `cudaFree()`.
+
+##### Exemple : Comparaison entre Python et C/C++ : 
+En Python :
+
+```python
+import cupy as cp
+
+a = cp.array([1, 2, 3], dtype=cp.float32)
+b = cp.array([4, 5, 6], dtype=cp.float32)
+c = a + b  # CuPy gère tout automatiquement
+print(c)  # Affiche le résultat sur le GPU
+```
+En C/C++ :
+```c
+#include <iostream>
+#include <cuda_runtime.h>
+
+// Kernel CUDA
+__global__ void addVectors(float *a, float *b, float *c, int n) {
+    int i = threadIdx.x;
+    if (i < n) c[i] = a[i] + b[i];
+}
+
+int main() {
+    int n = 3;
+    float h_a[n] = {1, 2, 3};  // Données CPU
+    float h_b[n] = {4, 5, 6};
+    float h_c[n];
+
+    // Alloue la mémoire GPU
+    float *d_a, *d_b, *d_c;
+    cudaMalloc(&d_a, n * sizeof(float));
+    cudaMalloc(&d_b, n * sizeof(float));
+    cudaMalloc(&d_c, n * sizeof(float));
+
+    // Copie CPU vers GPU
+    cudaMemcpy(d_a, h_a, n * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, h_b, n * sizeof(float), cudaMemcpyHostToDevice);
+
+    // Lance le kernel (1 bloc, n threads)
+    addVectors<<<1, n>>>(d_a, d_b, d_c, n);
+
+    // Copie GPU vers CPU
+    cudaMemcpy(h_c, d_c, n * sizeof(float), cudaMemcpyDeviceToHost);
+
+    // Affiche le résultat
+    for (int i = 0; i < n; i++) std::cout << h_c[i] << " ";
+
+    // Nettoie la mémoire GPU
+    cudaFree(d_a); cudaFree(d_b); cudaFree(d_c);
 }
 ```
+Pour de l’optimisation manuelle et l’écriture de kernels spécialisés pour des cas précis, l’utilisation du C/C++ est recommandée.
 
+### Bibliothèque C/C++ intéressantes :  
+
+**Thrust** est une bibliothèque qui fournit des algorithmes parallèles optimisés pour GPU. Elle ressemble à la bibliothèque STL (Standard Template Library) en C++.
+
+La STL contient essentiellement des implémentations de structures de données et d’algorithmes courants, tels que des listes, piles, tableaux, tris, recherches, etc...
+
+Thrust permet d’utiliser ces algorithmes sur le GPU, en utilisant la syntaxe de la STL. Il est donc possible d’écrire du code C++ qui s’exécute sur le GPU sans avoir à se soucier des détails de l’architecture CUDA.
+
+##### Exemple d’un tri tableau sur GPU :
 ```c
-// Allocation de la mémoire sur GPU
-int* gpuArrmerge;
-int* gpuTemp;
+#include <thrust/sort.h>
 
-cudaMalloc((void**)&gpuArrmerge, size * sizeof(int));
-cudaMalloc((void**)&gpuTemp, size * sizeof(int));
+// Données sur le GPU (déjà alloées avec cudaMalloc)
+thrust::device_ptr<float> d_data = ...; 
+
+// Tri sur GPU (équivalent de std::sort, mais sur GPU)
+thrust::sort(thrust::device, d_data, d_data + N);
+```
+`thrust::device` indique que l’opération est effectuée sur le GPU, et `d_data` pointe vers les données présentes sur le GPU.
+
+#### Quelques exemples algorithmes disponibles dans Thrust :
+
+| Algorithme         | Exemple (GPU avec Thrust)                | Équivalent sur CPU (STL)   |
+|--------------------|------------------------------------------|-----------------------------|
+| Tri                | `thrust::sort(device, début, fin)`       | `std::sort`                 |
+| Somme / Réduction  | `thrust::reduce(device, début, fin)`     | `std::accumulate`           |
+| Recherche          | `thrust::find(device, début, fin)`       | `std::find`                 |
+| Copie              | `thrust::copy(device, src, dest)`        | `std::copy`                 |
+
+Il y a aussi quelques exemples dans `/TER/GPU_en_C/Thrust` où l’on peut voir des implémentations avec et sans Thrust.
+
+Pour éviter la complexité d’écriture des kernels, cette bibliothèque est très utile pour les débutants en CUDA.
+
+Un exemple pour compiler : 
+```bash
+nvcc  calcul_nombre_aleatoire_en_parallele.cu -o calcul_nombre_aleatoire_en_parallele
+```
+puis exécuter le programme avec : 
+```bash
+./calcul_nombre_aleatoire_en_parallele
+```
+#### Autres bibliothèques C/C++ intéressantes : cuBLAS et cuFFT : Algèbre Lineaire & FFT sur GPU.
+
+### cuBLAS
+🔗 https://github.com/NVIDIA/cuda-samples/tree/master/Samples/4_CUDA_Libraries/simpleCUBLAS
+
+Les opérations mathématiques de type BLAS (somme scalaire, produit matriciel, etc.) nécessitent d'importantes ressources en calcul et en mémoire.
+
+L'utilisation de cuBLAS permet d'exécuter ces opérations d'algèbre linéaire de manière hautement optimisée sur le GPU, ce qui améliore considérablement les performances, notamment pour les calculs intensifs.
+
+#### Niveaux de BLAS pris en charge par cuBLAS
+
+La bibliothèque cuBLAS couvre l’ensemble des trois niveaux du standard BLAS, chacun correspondant à un type d’opération avec une complexité différente :
+
+| **Niveau** | **Type d’opération**                         | **Exemples de fonctions cuBLAS**       |
+|------------|-----------------------------------------------|----------------------------------------|
+| **1**      | Opérations vectorielles (**O(N)**)           | `cublasSaxpy`, `cublasDdot`            |
+| **2**      | Multiplications matrice–vecteur (**O(N²)**)  | `cublasSgemv`, `cublasDsymv`           |
+| **3**      | Multiplications matrice–matrice (**O(N³)**)  | `cublasSgemm`, `cublasDgemm`           |
+
+####  cuFFT : Transformée de Fourier sur GPU.
+
+🔗 https://github.com/NVIDIA/cuda-samples/tree/master/Samples/4_CUDA_Libraries/simpleCUFFT
+
+La FFT(Transformée de Fourier rapide) est utilisée pour l’analyse fréquentielle de signaux (audio, images, etc.).  
+Elle est donc idéale pour le traitement du signal en temps réel, en raison de son efficacité algorithmique.
+La bibliothèque cuFFT est optimisée et permettant ainsi d’accélérer les calculs FFT par rapport aux implémentations CPU.
+
+##### Fonctions principales de cuFFT
+ 
+Le tableau ci-dessous présente les principales fonctions utilisées pour initialiser un plan de calcul et exécuter les FFT entre données réelles et complexes.
+
+| **Fonction**           | **Opération**                                  |
+|------------------------|------------------------------------------------|
+| `cufftPlan1d/2d/3d`    | Initialise un plan FFT (1D, 2D ou 3D)          |
+| `cufftExecR2C`         | Transformée de Fourier : Réel → Complexe       |
+| `cufftExecC2R`         | Transformée de Fourier : Complexe → Réel       |
+
+
+
+##### Tests comparatifs : GPU vs CPU
+
+Nous réalisons deux tests pour comparer les performances entre **GPU** et **CPU** :
+
+- cuBLAS (Multiplication matricielle) : comparaison des temps d’exécution d’un produit matriciel sur le GPU (via cuBLAS) et sur le CPU (via BLAS ou `numpy.dot` par exemple).
+
+- FFT (Transformée de Fourier rapide) : comparaison entre l’exécution de la FFT sur le GPU (via cuFFT ou CuPy) et sur le CPU (via NumPy ou SciPy).
+
+Ces tests permettent de mettre en évidence les gains de performance apportés par l’accélération GPU dans des opérations intensives en calcul.
+
+Résultat : 
+```c
+Benchmark Multiplication Matricielle (GEMM) 
+Matrices 1024x1024
+
+CPU GEMM: 120.543 ms
+GPU GEMM: 2.189 ms
+```
+```c
+Benchmark FFT 
+Taille du signal: 1048576 points
+
+CPU FFT: 25.672 ms
+GPU FFT: 0.412 ms
 ```
 
+### Autres bibliothèques utiles pour CUDA en C/C++
+🔗https://github.com/NVIDIA/cuda-samples/tree/master/Samples/4_CUDA_Libraries
+
+- **cuRAND**  
+  Générateur de nombres aléatoires haute performance sur GPU (uniformes, normaux, log-normaux, etc.).
+
+- **cuSPARSE**  
+  Fournit des algorithmes optimisés pour les matrices creuses (sparse), utiles dans les grands systèmes linéaires.
+
+- **NPP (NVIDIA Performance Primitives)**  
+  Ensemble de fonctions optimisées pour le traitement d’images et de signaux (filtrage, convolution, transformation de couleurs...)
+
+- **CUB**  
+  Bas niveau mais très rapide : primitives parallèles (scan, reduce, radix sort) très efficaces et personnalisables.
+
+- **nvGRAPH**  
+  Fournit des algorithmes pour le traitement de graphes (BFS, PageRank, etc.) sur GPU.
+
+- **TensorRT**  
+  Pour l'inférence de réseaux de neurones profonds avec une optimisation sur GPU.
+
+- **NCCL (NVIDIA Collective Communications Library)**  
+  Utilisée pour la communication rapide entre plusieurs GPU (par ex. pour le Deep Learning distribué).
+
+
+### 🔹 Exemples notables dans `CUDA_Features`
+
+🔗https://github.com/NVIDIA/cuda-samples/tree/master/Samples/3_CUDA_Features
+
+- `simpleCudaGraphs` 
+  Démontre l'utilisation des CUDA Graphs, une fonctionnalité permettant de capturer et de réutiliser des séquences d'opérations GPU. Cela réduit la surcharge du CPU et améliore les performances globales.
+
+- `cdpSimpleQuicksort` 
+  Implémente un tri rapide (quicksort) en utilisant le CUDA Dynamic Parallelism, où les kernels peuvent lancer d'autres kernels. Cela permet une parallélisation récursive efficace.
+
+- `cudaTensorCoreGemm`  
+  Montre comment exploiter les Tensor Cores pour effectuer des multiplications de matrices à haute performance, en utilisant l’API WMMA (Warp Matrix Multiply Accumulate).
+
+- `graphMemoryFootprint`  
+  Explore la gestion de la mémoire dans les CUDA Graphs, et comment minimiser l’empreinte mémoire lors de l'exécution de graphes complexes.
+
+
+
+
+### Multi-GPU avec CUDA
+
+🔗https://github.com/NVIDIA/cuda-samples/tree/master/Samples/0_Introduction/simpleMultiGPU
+
+Lorsque l’on dispose de plusieurs GPU (comme dans notre cas, avec 2 GPU H100), cette méthodologie de programmation peut être très avantageuse. Elle permet de répartir les calculs sur plusieurs cartes en parallèle, ce qui est particulièrement utile pour :
+
+- accélérer l'entraînement de grands modèles (comme les LLM),
+- traiter de gros jeux de données,
+- réduire le temps de calcul global,
+- gérer des modèles trop volumineux pour un seul GPU,
+- et optimiser l’utilisation des ressources disponibles.
+
+Exemple de mise en œuvre :  
+`/TER/GPU_en_C/Multi_gpu/multi_gpu.cu`
 
 
 
