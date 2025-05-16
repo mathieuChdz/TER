@@ -11,6 +11,10 @@ Dans ce rapport, nous analysons les performances des CPU et GPU pour l'exécutio
 À noter :
 - Le temps d'exécution moyen calculé est arrondi à la 5e décimale près
 - __10 exécutions__ d'un même N sample pour constituer le temps d'exécution moyen
+- Formule de l'amélioration GPU : 
+$$
+\left( \frac{ValGPU - ValCPU}{ValCPU} \right) \times 100
+$$
 
 ### 1 - KMEANS
 
@@ -21,17 +25,18 @@ Dans ce rapport, nous analysons les performances des CPU et GPU pour l'exécutio
 | cluster_std | 4.0 |
 | random_state | 42 |
 
-| nb samples | Temps moyen d'execution (s) (CPU) | Temps moyen d'execution (s) (GPU) | Amélioration GPU |
-|:------------:|:------------:|:------------:|:------------:|
-| 500 000 | 0.69098 | NEED TO DO |  |
-| 1 000 000 | 1.28983 | NEED TO DO |  |
-| 1 500 000 | 1.96068 | NEED TO DO |  |
-| 2 000 000 | 2.37538 | NEED TO DO |  |
-| 2 500 000 | 3.14407 | NEED TO DO |  |
-| 3 000 000 | 3.84097 | NEED TO DO |  |
-| 3 500 000 | 4.72982 | NEED TO DO |  |
-| 4 000 000 | 5.43119 | NEED TO DO |  |
-| 4 500 000 | 6.64960 | NEED TO DO |  |
+| nb samples | Mean exec time (s) (CPU) | Mean exec time (s) (GPU) | Amélioration GPU (en %) | Mean exec time (cuDF) | Amélioration cuDF
+|:------------:|:------------:|:------------:|:------------:|:------------:|:------------:|
+| 500 000 | 0.69098 | 0.07606 | -88.99 % | NEED TO DO |  |
+| 1 000 000 | 1.28983 | 0.05432 | -95.79 % | NEED TO DO |  |
+| 1 500 000 | 1.96068 | 0.06764 | -96.55 % | NEED TO DO |  |
+| 2 000 000 | 2.37538 | 0.09601 | -95.96 % | NEED TO DO |  |
+| 2 500 000 | 3.14407 | 0.12450 | -96.04 % | NEED TO DO |  |
+| 3 000 000 | 3.84097 | 0.13251 | -96.55 % | NEED TO DO |  |
+| 3 500 000 | 4.72982 | 0.20585 | -95.65 % | NEED TO DO |  |
+| 4 000 000 | 5.43119 | 0.20793 | -96.17 % | NEED TO DO |  |
+| 4 500 000 | 6.64960 | 0.23208 | -96.51 % | NEED TO DO |  |
+| 5 000 000 | 7.75914 | 0.23860 | -96.92 % | NEED TO DO |  |
 
 
 ### 2 - REGRESSION LINEAIRE
@@ -58,7 +63,7 @@ Dans ce rapport, nous analysons les performances des CPU et GPU pour l'exécutio
 | 4 500 000 | NEED TO DO | NEED TO DO |  |
 
 
-### 2 - DESCENTE DE GRADIANT
+### 3 - DESCENTE DE GRADIENT
 
 | Paramètres / Présets fixes | Valeur |
 |:----------|:----------:|

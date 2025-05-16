@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport - GPU et environnement de développement</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #bdcccc;
+            /* background: linear-gradient(90deg, rgb(0, 119, 255) 0%, rgba(199, 87, 93, 1) 50%, rgb(255, 0, 51) 100%); */
+            background-size: 200% 200%; /* Makes the gradient larger for smooth animation */
+            animation: gradientMove 1s infinite; /* Animation for the gradient */
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 15%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding-top: 20px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px)
+        }
+
+        .sidebar a {
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 1em;
+            color: white;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: background-color 0.1s;
+        }
+
+        .main-content {
+            margin-left: 15%;
+            padding: 20px;
+        }
+
+        h1, h2, h3 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="#langages">Langages</a>
+        <a href="#section-2">Section 2</a>
+        <a href="#section-3">Section 3</a>
+        <a href="#section-4">Section 4</a>
+    </div>
+
+    <div class="main-content">
+        <h1 id="langages">GPU et environnement de développement</h1>
+        <h2>Langages :</h2>
+        <ul>
+            <li>Python avec bibliothèques, peuvent faire des choses très différentes, avec plus ou moins de contrôle direct sur le GPU</li>
+            <li>C/C++ avec extensions CUDA (pas encore recherché) --> plus compliqué mais plus de contrôle sur le GPU, contrôle plus précis</li>
+        </ul>
+
+        <h3>Nécessaire pour coder en Python :</h3>
+        <ul>
+            <li>Driver Nvidia, CUDA Toolkit, Python avec des versions compatibles et les bibliothèques à utiliser également avec une version compatible avec le reste</li>
+        </ul>
+
+        <h3>Nécessaire pour coder en C/C++ :</h3>
+        <ul>
+            <li>Driver Nvidia, CUDA Toolkit, Compiler C/C++ avec des versions compatibles</li>
+        </ul>
+
+        <h3>Modules Python :</h3>
+        <ul>
+            <li>
+                <strong>CuPy :</strong> Quasiment toutes les fonctions de NumPy sont aussi sur CuPy : manipulation de matrices, de polynômes, algèbre linéaire, transformation rapide de Fourier, génération de nombres aléatoires, tests, opérations binaires, fonctions mathématiques, ...
+                Plusieurs sous-modules de SciPy sont également disponibles.
+            </li>
+        </ul>
+
+        <h2 id="section-2">Section 2</h2>
+        <p>Contenu de la section 2.</p>
+
+        <h2 id="section-3">Section 3</h2>
+        <p>Contenu de la section 3.</p>
+
+        <h2 id="section-4">Section 4</h2>
+        <p>Contenu de la section 4.</p>
+    </div>
+</body>
+</html>
