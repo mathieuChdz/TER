@@ -4,9 +4,11 @@
 - [Python via GPU](#utilisation-gpu-en-python)
     - [Modules python](#modules-python)
     - [LLM](#llm)
-- [C/C++ via GPU](#utilisation-gpu-en-c-c++)
 - [RAPIDS](#rapids)
-- [Machine Learning : CuML](#machine-learning)
+    - [cuGraph](#cugraph)
+    - [Machine Learning : CuML](#machine-learning)
+- [Autres bibliothèques python](#autres-bibliothèques-python)
+- [C/C++ via GPU](#utilisation-gpu-en-c-c++)
 
 
 ---
@@ -247,6 +249,107 @@ Documentation : https://pytorch.org/docs/stable/index.html
 
 Il devrait être possible d'utilsier une extension vscode (par exemple continue) avec une api pour les llm installés sur le serveur pour pouvoir les utiliser directement dans vscode mais nous ne l'avons pas testé car nous avons recherché d'autres choses et que ce n'était pas notre but principal.
 
+## RAPIDS
+
+C'est quoi rapids ?
+
+RAPIDS est un ensemble de bibliothèques (open-source) développé par NVIDIA, pour accélérer les executions via GPU. Rapids se base et utilise NVIDIA CUDA ainsi que Apache Arrow pour l'accélération GPU. Plus précisément, retrouve :
+
+## RAPIDS : Utilisation de CUDA et Apache Arrow
+
+| **Technologie** | **Description** |
+|------------------|------------------|
+| **CUDA** | Plateforme de calcul parallèle développée par NVIDIA. Permet d'exploiter la puissance des GPU pour effectuer des calculs massivement parallèles (traitement de données, apprentissage machine, ...) |
+| **Apache Arrow** | Framework open-source conçu pour optimiser le traitement et le partage de données en mémoire (format de données très performant). Le format est un tableau en colonnes --> réduit les coûts de sérialisation et de désérialisation.|
+
+Cette combinaison permet d'accélérer les workflows de science des données (accéléreration des processus de traitement des données).
+
+Il est conçu pour fonctionner de manière similaire aux outils populaires comme Pandas ou Scikit-learn, mais en exploitant la puissance des GPU au maximum pour de meilleurs performances.
+
+### Graphs
+
+#### cuGraph
+
+cuGraph est une bibliothèque de graphes disponible dans RAPIDS. Elle permet d'exécuter des algorithmes de graphes sur GPU, ce qui améliore considérablement les performances par rapport aux implémentations CPU.
+
+cuGraph est disponible en tant que backend de NetworksX (la bibliothèque de graphes Python populaire) en utilisant nx-cugraph. Il suffit de mettre la variable d'environnement NX_CUGRAPH_AUTOCONFIG à True pour utiliser cuGraph comme backend sans changer le code écrit avec NetworkX.
+
+La liste des algorithmes disponibles dans cuGraph (assez longue) est disponible [ici](https://docs.rapids.ai/api/cugraph/stable/nx_cugraph/supported-algorithms/).
+
+Il n'y a rien de particulièrement compliqué pour lancer ces algorithmes car tout est déjà implémenté. Il faut juste configurer les paramètres d'entrée (graph et autres) correctement.   
+Des exemples de comment exécuter les algorithmes sont disponibles sur le github de cuGraph [ici](https://github.com/rapidsai/cugraph/tree/main/notebooks/algorithms).
+
+
+### Machine Learning
+
+#### cuML
+
+cuML est une bibliothèque de machine learning disponible dans RAPIDS. On l'utilise ici pour exploiter la puissance des GPU afin d'améliorer les performances des training de modèles de machine learning. Elle s'utilise de la même facon que scikit-learn.
+
+Avec cuML, il est possible d'exécuter rapidement des algorithmes tels que :
+- Régression linéaire et logistique
+- Clustering (KMEANS)
+- Classification
+- Autres
+
+L'avantage de cuML est que l'entrainement des modèle peut aller jusqu'à 50 fois plus vite. Cela permet d'avoir plus de temps pour optimiser son modèle sans avoir un problème de temps d'attente entre chaque entrainement.
+
+[Pour en savoir plus sur cuML](https://rapids.ai/cuml-accel/)
+
+Pour tester et comparer les performances CPU vs GPU vs GPU avec cuML, des modèles de machines learning étudiés et travaillés en 2ème et 3ème année de BUT informatique ont été sélectionnés. On y retrouve :
+- Régression Linéaire
+- KMEANS
+- Descente de gradient
+
+Voir document de test de performance (temps d'execution) sur différents modèles de machine learning [Cliquez ici](../machine_learning_CPU_vs_GPU.md)
+
+## Autres bibliothèques python 
+
+- **Numba** : bibliothèque de compilation de code python qui utilise le GPU. Son objectif ici est de pouvoir utiliser le GPU sans avoir à écrire du CUDA top poussé.
+[Plus d'informations ici](https://numba.pydata.org/)
+
+- **cuDF** : bibliothèque de dataframe pour GPU (se base, comme pour **cuML**, sur *Apache Arrow*).
+[Plus d'informations ici](https://docs.rapids.ai/api/cudf/stable/)
+
+- **rmn** : sert pour la gestion de mémoire GPU (RAPIDS Memory Manager).
+[Plus d'informations ici](https://docs.rapids.ai/api/rmm/stable/guide/)
+
+- ### Machine Learning :
+    - **tensorflow** : [Informations ici](https://www.tensorflow.org/?hl=fr)
+    
+    - **onnxruntime** : [Informations ici](https://onnxruntime.ai/)
+
+- ### Traitement d'image et vision par ordinateur :
+    - **opencv** : [Informations ici](https://opencv.org/)
+
+    - **nvidia DALI** : Utiliser pour de l'entrainement IA sur GPU
+    [Informations ici](https://developer.nvidia.com/dali)
+
+    - **nvidia VPI** : Traitement en temps réel de flux vidéo
+    [Informations ici](https://docs.nvidia.com/vpi/index.html)
+
+- ### Traitement de signal audio et video :
+    - **cusignal** : SciPy pour GPU
+    [Informations ici](https://developer.nvidia.com/blog/accelerated-signal-processing-with-cusignal/)
+
+    - **Torch audio** : [Informations ici](https://docs.pytorch.org/audio/stable/index.html)
+
+
+- **hoomd-blue** : Simulation de système de particule.
+[Informations ici](https://hoomd-blue.readthedocs.io/en/v5.2.0/)
+
+- **nvidia warp** : Permet la simulation de physique (ex : aérodynamisme, chute d'objets).
+[Informations ici](https://nvidia.github.io/warp/)
+
+- **vispy** : Bibliothèque qui sert à la visualisation interactive (2D/3D) de données.
+[Informations ici](https://vispy.org/)
+
+- **cuQuantum** : Sert au calcul quantique
+[Informations ici](https://developer.nvidia.com/cuquantum-sdk)
+
+- **nvtabular**: Utile pour faire des systèmes de recommendations en GPU (donc accélérés)
+[Informations ici](https://developer.nvidia.com/nvidia-merlin/nvtabular)
+
 <h2 id="utilisation-gpu-en-c-c++">Utilisation GPU en C/C++</h2>
 
 ### Utilisation de kernels
@@ -269,7 +372,7 @@ Cela permet de paralléliser, à volonté, certaines opérations et ainsi d’ac
 - Très éfficace lorque c'est bien utilisé
 
 
-##### Exemple de programmation cuda (bout de codes):
+#### Exemple de programmation cuda (bouts de codes):
 
 ```c
 // Kernel d'une addition de deux tableaux
@@ -531,106 +634,3 @@ Lorsque l’on dispose de plusieurs GPU (comme dans notre cas, avec 2 GPU H100),
 
 Exemple de mise en œuvre :  
 `/TER/GPU_en_C/Multi_gpu/multi_gpu.cu`
-
-
-
-## RAPIDS
-
-C'est quoi rapids ?
-
-RAPIDS est un ensemble de bibliothèques (open-source) développé par NVIDIA, pour accélérer les executions via GPU. Rapids se base et utilise NVIDIA CUDA ainsi que Apache Arrow pour l'accélération GPU. Plus précisément, retrouve :
-
-## RAPIDS : Utilisation de CUDA et Apache Arrow
-
-| **Technologie** | **Description** |
-|------------------|------------------|
-| **CUDA** | Plateforme de calcul parallèle développée par NVIDIA. Permet d'exploiter la puissance des GPU pour effectuer des calculs massivement parallèles (traitement de données, apprentissage machine, ...) |
-| **Apache Arrow** | Framework open-source conçu pour optimiser le traitement et le partage de données en mémoire (format de données très performant). Le format est un tableau en colonnes --> réduit les coûts de sérialisation et de désérialisation.|
-
-Cette combinaison permet d'accélérer les workflows de science des données (accéléreration des processus de traitement des données).
-
-Il est conçu pour fonctionner de manière similaire aux outils populaires comme Pandas ou Scikit-learn, mais en exploitant la puissance des GPU au maximum pour de meilleurs performances.
-
-### Graphs
-
-#### cuGraph
-
-cuGraph est une bibliothèque de graphes disponible dans RAPIDS. Elle permet d'exécuter des algorithmes de graphes sur GPU, ce qui améliore considérablement les performances par rapport aux implémentations CPU.
-
-cuGraph est disponible en tant que backend de NetworksX (la bibliothèque de graphes Python populaire) en utilisant nx-cugraph. Il suffit de mettre la variable d'environnement NX_CUGRAPH_AUTOCONFIG à True pour utiliser cuGraph comme backend sans changer le code écrit avec NetworkX.
-
-La liste des algorithmes disponibles dans cuGraph (assez longue) est disponible [ici](https://docs.rapids.ai/api/cugraph/stable/nx_cugraph/supported-algorithms/).
-
-Il n'y a rien de particulièrement compliqué pour lancer ces algorithmes car tout est déjà implémenté. Il faut juste configurer les paramètres d'entrée (graph et autres) correctement.   
-Des exemples de comment exécuter les algorithmes sont disponibles sur le github de cuGraph [ici](https://github.com/rapidsai/cugraph/tree/main/notebooks/algorithms).
-
-
-### Machine Learning
-
-#### cuML
-
-cuML est une bibliothèque de machine learning disponible dans RAPIDS. On l'utilise ici pour exploiter la puissance des GPU afin d'améliorer les performances des training de modèles de machine learning. Elle s'utilise de la même facon que scikit-learn.
-
-Avec cuML, il est possible d'exécuter rapidement des algorithmes tels que :
-- Régression linéaire et logistique
-- Clustering (KMEANS)
-- Classification
-- Autres
-
-L'avantage de cuML est que l'entrainement des modèle peut aller jusqu'à 50 fois plus vite. Cela permet d'avoir plus de temps pour optimiser son modèle sans avoir un problème de temps d'attente entre chaque entrainement.
-
-[Pour en savoir plus sur cuML](https://rapids.ai/cuml-accel/)
-
-Pour tester et comparer les performances CPU vs GPU vs GPU avec cuML, des modèles de machines learning étudiés et travaillés en 2ème et 3ème année de BUT informatique ont été sélectionnés. On y retrouve :
-- Régression Linéaire
-- KMEANS
-- Descente de gradient
-
-Voir document de test de performance (temps d'execution) sur différents modèles de machine learning [Cliquez ici](../machine_learning_CPU_vs_GPU.md)
-
-## Autres bibliothèques python 
-
-- **Numba** : bibliothèque de compilation de code python qui utilise le GPU. Son objectif ici est de pouvoir utiliser le GPU sans avoir à écrire du CUDA top poussé.
-[Plus d'informations ici](https://numba.pydata.org/)
-
-- **cuDF** : bibliothèque de dataframe pour GPU (se base, comme pour **cuML**, sur *Apache Arrow*).
-[Plus d'informations ici](https://docs.rapids.ai/api/cudf/stable/)
-
-- **rmn** : sert pour la gestion de mémoire GPU (RAPIDS Memory Manager).
-[Plus d'informations ici](https://docs.rapids.ai/api/rmm/stable/guide/)
-
-- ### Machine Learning :
-    - **tensorflow** : [Informations ici](https://www.tensorflow.org/?hl=fr)
-    
-    - **onnxruntime** : [Informations ici](https://onnxruntime.ai/)
-
-- ### Traitement d'image et vision par ordinateur :
-    - **opencv** : [Informations ici](https://opencv.org/)
-
-    - **nvidia DALI** : Utiliser pour de l'entrainement IA sur GPU
-    [Informations ici](https://developer.nvidia.com/dali)
-
-    - **nvidia VPI** : Traitement en temps réel de flux vidéo
-    [Informations ici](https://docs.nvidia.com/vpi/index.html)
-
-- ### Traitement de signal audio et video :
-    - **cusignal** : SciPy pour GPU
-    [Informations ici](https://developer.nvidia.com/blog/accelerated-signal-processing-with-cusignal/)
-
-    - **Torch audio** : [Informations ici](https://docs.pytorch.org/audio/stable/index.html)
-
-
-- **hoomd-blue** : Simulation de système de particule.
-[Informations ici](https://hoomd-blue.readthedocs.io/en/v5.2.0/)
-
-- **nvidia warp** : Permet la simulation de physique (ex : aérodynamisme, chute d'objets).
-[Informations ici](https://nvidia.github.io/warp/)
-
-- **vispy** : Bibliothèque qui sert à la visualisation interactive (2D/3D) de données.
-[Informations ici](https://vispy.org/)
-
-- **cuQuantum** : Sert au calcul quantique
-[Informations ici](https://developer.nvidia.com/cuquantum-sdk)
-
-- **nvtabular**: Utile pour faire des systèmes de recommendations en GPU (donc accélérés)
-[Informations ici](https://developer.nvidia.com/nvidia-merlin/nvtabular)
